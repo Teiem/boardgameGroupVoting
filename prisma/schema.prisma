@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tables
+
+model Instance {
+  name           String          @id @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  availableUsers AvailableUser[]
+  games          Game[]
+}
+
+model AvailableUser {
+  id                    String   @id @default(uuid())
+  instanceId            String
+  name                  String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  wantsToPlayWithUserId String?
+
+  instance                  Instance        @relation(fields: [instanceId], references: [name], onDelete: Cascade)
+  wantsToPlayWithUser       AvailableUser?  @relation("WantsToPlayWithUser", fields: [wantsToPlayWithUserId], references: [id], onDelete: SetNull)
+  wantsToBePlayedWithByUser AvailableUser[] @relation("WantsToPlayWithUser")
+  BroughtGames              AvailableGame[]
+  votes                     UserGameVote[]
+  UserSession               UserSession[]
+
+  @@unique([instanceId, name])
+}
+
+model UserSession {
+  sessionId String @id @default(uuid())
+  userId    String
+
+  user AvailableUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AvailableGame {
+  id              String   @id @default(uuid())
+  ownerId         String
+  gameId          String
+  isPromoted      Boolean
+  isOthersAllowed Boolean
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  availableUser AvailableUser @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  game          Game          @relation(fields: [gameId], references: [id])
+
+  UserGameVote UserGameVote[]
+}
+
+model UserGameVote {
+  userId          String
+  availableGameId String
+  rank            Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  availableUser AvailableUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availableGame AvailableGame @relation(fields: [availableGameId], references: [id], onDelete: Cascade)
+
+  @@id([userId, availableGameId])
+}
+
+model Game {
+  id            String  @id
+  instanceId    String
+  name          String
+  minPlayers    Int
+  maxPlayers    Int
+  minDuration   Int
+  maxDuration   Int
+  description   String
+  thumbnail     String?
+  yearPublished Int?
+  rating        Float?
+  complexity    Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  instance       Instance        @relation(fields: [instanceId], references: [name], onDelete: Cascade)
+  availableGames AvailableGame[]
+}

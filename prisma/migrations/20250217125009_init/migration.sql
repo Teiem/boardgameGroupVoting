@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Game" ALTER COLUMN "yearPublished" DROP NOT NULL,
+ALTER COLUMN "complexity" DROP NOT NULL,
+ALTER COLUMN "rating" DROP NOT NULL;
