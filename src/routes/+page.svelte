@@ -20,10 +20,12 @@
 	setInstance({ name: data.instanceId });
 	setUser(data.user);
 
-	availableGames.splice(0, 0, ...data.availableGames);
+	availableGames.splice(0, availableGames.length, ...data.availableGames);
 	let votes = $state(data.votes);
 
 	let lastGames = $state(data.lastGames);
+
+	console.log("availableGames", availableGames.length);
 
 	// let wantsToPlayWith = $state<AvailableUser["id"] | null>(null);
 
@@ -83,6 +85,8 @@
 
 		return sortedAndPromotedFirst.filter(availableGame => availableGame.game.maxDuration <= maxDuration!);
 	});
+
+	console.log("filteredAndSorted", filteredAndSorted.length);
 
 	const hasPromotedGame = $derived(availableGames.some(availableGame => availableGame.isPromoted && availableGame.ownerId === user.id));
 </script>

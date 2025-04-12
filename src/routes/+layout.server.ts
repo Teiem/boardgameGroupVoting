@@ -113,6 +113,8 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 		id: availableUser.id,
 	}));
 
+	console.log({available});
+
 	return {
 		games: instance.games,
 		availableGames: available,

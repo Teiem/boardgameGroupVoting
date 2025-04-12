@@ -112,14 +112,9 @@
 			onoutroend={() => swapy?.update()}
 			onintroend={() => swapy?.update()}
 		>
-		<!-- <div
-		data-swapy-slot={slotId}
-		in:receive={{ key: slotId }}
-		out:send={{ key: slotId }}
-	> -->
 			{#if item}
 				{#key itemId}
-					<div data-swapy-item={itemId}>
+					<div data-swapy-item={itemId} data-isDragging={draggedElementId === itemId}>
 						{@render snippet({
 							item,
 							isDragging: draggedElementId === itemId,
@@ -138,4 +133,7 @@
 </div>
 
 <style>
+	[data-isDragging] {
+		will-change: transform;
+	}
 </style>

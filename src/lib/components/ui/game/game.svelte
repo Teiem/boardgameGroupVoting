@@ -7,21 +7,7 @@
 	import BadgeWithTooltip from "../badgeWithTooltip/badgeWithTooltip.svelte";
 	import { onDestroy, onMount, type Component } from "svelte";
 
-	import {
-		ChevronDown,
-		ChevronUp,
-		GripVertical,
-		ArrowDown,
-		ArrowUp,
-		Users,
-		Clock,
-		Star,
-		Brain,
-		Check,
-		User,
-		Edit,
-		Trash2,
-	} from "lucide-svelte";
+	import { ChevronDown, ChevronUp, GripVertical, ArrowDown, ArrowUp, Users, Clock, Star, Brain, Check, User, Edit, Trash2 } from "lucide-svelte";
 	import { Badge } from "../badge";
 	import { draw } from "svelte/transition";
 	import { cn } from "$lib/utils";
@@ -51,7 +37,6 @@
 	let isSliding = $state(false);
 
 	onMount(() => {
-		return;
 		const checks = [...root.querySelectorAll<HTMLElement>("[data-check]")] as [HTMLElement, HTMLElement];
 
 		let initialX = 0;
@@ -62,6 +47,8 @@
 		let success = false;
 
 		let minDragReached = false;
+		let touchStartEvent: Event | null = null;
+		let surpressScroll = true;
 
 		let requestAnimationFrameQueued = false;
 		let animationFrame: number | null = null;
@@ -119,26 +106,30 @@
 			animationFrame = null;
 
 			minDragReached = false;
+			surpressScroll = true;
 			success = false;
 			initialX = e.clientX;
 			initialY = e.clientY;
 		};
 
 		const onPointerMove = (e: PointerEvent) => {
-
 			e.preventDefault();
 			dx = e.clientX - initialX;
 			dy = e.clientY - initialY;
 
 			updateStyle();
 
+			console.log({ dx, dy });
 			if (!minDragReached && dx * dx + dy * dy > 25) {
 				minDragReached = true;
 
 				if (Math.abs(dx) > Math.abs(dy)) {
-					el.addEventListener("touchmove", preventDefault, { passive: false });
+					// execute action
+					touchStartEvent?.preventDefault();
+					console.log("Cancle", touchStartEvent);
 					disable();
 				} else {
+					// cancel action
 					onPointerUp();
 				}
 			}
@@ -147,6 +138,8 @@
 		const onPointerUp = async () => {
 			dx = 0;
 			dy = 0;
+
+			surpressScroll = false;
 
 			if (animationFrame) cancelAnimationFrame(animationFrame);
 			animationFrame = null;
@@ -172,6 +165,39 @@
 		};
 
 		el.addEventListener("pointerdown", onPointerDown, { passive: false });
+
+		const onTouchStart = (event: Event) => {
+			touchStartEvent = event;
+
+			document.addEventListener(
+				"touchmove",
+				event => {
+					console.log("surpressScroll", surpressScroll);
+
+					if (surpressScroll) {
+						event.preventDefault();
+					}
+				},
+				{ passive: false },
+			);
+
+			document.addEventListener(
+				"touchend",
+				() => {
+					el.removeEventListener("touchmove", onTouchStart);
+				},
+				{ once: true },
+			);
+		};
+
+		el.addEventListener("touchstart", onTouchStart, { passive: false });
+
+		return () => {
+			if (!el) return;
+
+			el.removeEventListener("pointerdown", onPointerDown);
+			el.removeEventListener("touchstart", onTouchStart);
+		};
 	});
 
 	let isSettingsOpen = $state(false);
@@ -209,37 +235,24 @@
 							<Card.Title>{game.name}</Card.Title>
 						</div>
 						<div class="flex items-center" data-intractable data-swapy-no-drag>
-							<Accordion.Trigger>
-							</Accordion.Trigger>
+							<Accordion.Trigger></Accordion.Trigger>
 						</div>
 					</div>
 
 					<div class="mt-1 flex flex-wrap gap-2">
-						<Badge
-							variant="secondary"
-							class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800"
-						>
+						<Badge variant="secondary" class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800">
 							<User class="h-3.5 w-3.5" />
 							<span class="text-xs font-medium">{game.minPlayers} - {game.maxPlayers}</span>
 						</Badge>
-						<Badge
-							variant="secondary"
-							class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800"
-						>
+						<Badge variant="secondary" class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800">
 							<Clock class="h-3.5 w-3.5" />
 							<span class="text-xs font-medium">{game.minDuration} - {game.maxDuration}</span>
 						</Badge>
-						<Badge
-							variant="secondary"
-							class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800"
-						>
+						<Badge variant="secondary" class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800">
 							<Brain class="h-3.5 w-3.5" />
 							<span class="text-xs font-medium">{game.complexity?.toFixed(1)}</span>
 						</Badge>
-						<Badge
-							variant="secondary"
-							class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800"
-						>
+						<Badge variant="secondary" class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 dark:bg-gray-800">
 							<Star class="h-3.5 w-3.5" />
 							<span class="text-xs font-medium">{game.rating?.toFixed(1)}</span>
 						</Badge>
@@ -266,10 +279,7 @@
 										bind:selectedGame={inEditCopy.game}
 										bind:isPromoted={inEditCopy.isPromoted}
 										onsubmit={() => {
-											updateAvailableGame(
-												{ id: availableGame.id, isPromoted: inEditCopy.isPromoted },
-												inEditCopy.game,
-											);
+											updateAvailableGame({ id: availableGame.id, isPromoted: inEditCopy.isPromoted }, inEditCopy.game);
 											isSettingsOpen = false;
 											availableGame.isPromoted = inEditCopy.isPromoted;
 											game = inEditCopy.game;
@@ -289,9 +299,7 @@
 								<Dialog.Content>
 									<Dialog.Header>
 										<Dialog.Title>Removing {game.name}</Dialog.Title>
-										<Dialog.Description
-											>Are you sure you want to remove {game.name} from the games you brought?</Dialog.Description
-										>
+										<Dialog.Description>Are you sure you want to remove {game.name} from the games you brought?</Dialog.Description>
 									</Dialog.Header>
 
 									<div class="flex justify-end gap-2">
@@ -365,5 +373,9 @@
 	img {
 		max-height: 1.25lh;
 		border-radius: 0.25rem;
+	}
+
+	[data-isSliding="true"] {
+		will-change: transform;
 	}
 </style>
