@@ -1,7 +1,7 @@
 <script lang="ts" generics="T extends { id: string }">
 	import type { Snippet } from "svelte";
 	import { onDestroy, onMount, untrack } from "svelte";
-	import { createSwapy, utils, type Swapy } from "$dep/swapy/src";
+	import { createSwapy, utils, type Swapy } from "swapy";
 	import { flip } from "svelte/animate";
 	import { send, receive } from "./transition";
 
