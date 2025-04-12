@@ -25,8 +25,6 @@
 
 	let lastGames = $state(data.lastGames);
 
-	console.log("availableGames", availableGames.length);
-
 	// let wantsToPlayWith = $state<AvailableUser["id"] | null>(null);
 
 	const onUsernameChange = () => {
@@ -86,8 +84,6 @@
 		return sortedAndPromotedFirst.filter(availableGame => availableGame.game.maxDuration <= maxDuration!);
 	});
 
-	console.log("filteredAndSorted", filteredAndSorted.length);
-
 	const hasPromotedGame = $derived(availableGames.some(availableGame => availableGame.isPromoted && availableGame.ownerId === user.id));
 </script>
 
@@ -124,7 +120,6 @@
 					<DndList
 						items={selectedGames}
 						onSwap={items => {
-							// console.log("SWAP", items.map(item => selectedGames.find(selectedGame => selectedGame.id === item)?.game.name));
 							votes = items;
 							DBSetVotes(user.id, votes);
 						}}
@@ -187,20 +182,6 @@
 					</div>
 				</div>
 				<Accordion.Root type="single" class="mb-4 flex flex-col gap-2">
-					<!-- <DndList items={filteredAndSorted} enabled={false}>
-						{#snippet snippet({ item, ...rest })}
-							<GameCard
-								bind:game={item.game}
-								availableGame={item}
-								{...rest}
-								onSuccess={() => {
-									votes.push(item.id);
-									DBSetVotes(user.id, votes);
-								}}
-							></GameCard>
-						{/snippet}
-					</DndList> -->
-					AAAA
 					{#each filteredAndSorted as item}
 						<GameCard
 							bind:game={item.game}
@@ -215,7 +196,6 @@
 						></GameCard>
 					{/each}
 				</Accordion.Root>
-				BBB
 			</div>
 
 			<Separator class="my-6" />

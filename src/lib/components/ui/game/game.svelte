@@ -119,14 +119,12 @@
 
 			updateStyle();
 
-			console.log({ dx, dy });
 			if (!minDragReached && dx * dx + dy * dy > 25) {
 				minDragReached = true;
 
 				if (Math.abs(dx) > Math.abs(dy)) {
 					// execute action
 					touchStartEvent?.preventDefault();
-					console.log("Cancle", touchStartEvent);
 					disable();
 				} else {
 					// cancel action
@@ -172,11 +170,7 @@
 			document.addEventListener(
 				"touchmove",
 				event => {
-					console.log("surpressScroll", surpressScroll);
-
-					if (surpressScroll) {
-						event.preventDefault();
-					}
+					if (surpressScroll) event.preventDefault();
 				},
 				{ passive: false },
 			);
