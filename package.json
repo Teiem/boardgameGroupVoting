@@ -18,6 +18,12 @@
 	"prisma": {
 		"seed": "ts-node prisma/seed.ts"
 	},
+	"browser": {
+		"fs": false,
+		"util": false,
+		"string_decoder": false,
+		"crypto": false
+	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.6",
 		"@eslint/js": "^9.20.0",

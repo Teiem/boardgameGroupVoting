@@ -2,7 +2,7 @@
 	import type { Game, Prisma } from "@prisma/client";
 	import Combobox from "../combobox/combobox.svelte";
 	import type { BGGSearchResponse, BoardGameItem } from "../../../../routes/api/bgg/+server";
-	import { bgg } from "bgg-sdk";
+	import bgg from "bgg-sdk";
 	import { instance } from "$lib/state/state.svelte";
 
 	type Option = {
