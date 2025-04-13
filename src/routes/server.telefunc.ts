@@ -1,7 +1,14 @@
 import prisma from "$lib/prisma";
-import type { AvailableGame, AvailableUser, Game, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
-export const DBSetVotes = async (userId: AvailableUser["id"], votes: AvailableGame["id"][]) => {
+type UserId = string;
+type GameId = string;
+
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+
+export const DBSetVotes = async (userId: UserId, votes: GameId[]) => {
 	await prisma.userGameVote.deleteMany({
 		where: {
 			userId,
@@ -41,13 +48,13 @@ export const getUserVotes = async () => {
       votes: votes!.map(vote => vote.availableGame.id),
       name: votes![0].availableUser.name,
     }]),
-	) as Record<AvailableUser["id"], {
+	) as Record<UserId, {
     name: string,
-    votes: Game["id"][],
+    votes: GameId[],
   }>;
 };
 
-export const DBAddAvailableGame = async (_availableGame: Prisma.AvailableGameUncheckedCreateInput, _game: Prisma.GameUncheckedCreateInput) => {
+export const DBAddAvailableGame = async (_availableGame: Prisma.AvailableGameCreateManyInput, _game: Prisma.GameCreateManyInput) => {
 	const game = await prisma.game.upsert({
 		update: _game,
 		create: _game,
@@ -67,8 +74,8 @@ export const DBAddAvailableGame = async (_availableGame: Prisma.AvailableGameUnc
 };
 
 export const DBUpdateAvailableGameAndGame = async (
-	_availableGame: Prisma.AvailableGameUncheckedUpdateInput & Pick<Prisma.AvailableGameUncheckedCreateInput, "id">,
-	_game: Prisma.GameUncheckedUpdateInput & Pick<Prisma.GameUncheckedCreateInput, "id">,
+	_availableGame: Prisma.AvailableGameCreateManyInput & Pick<Prisma.AvailableGameCreateManyInput, "id">,
+	_game: Prisma.GameCreateManyInput & Pick<Prisma.GameCreateManyInput, "id">,
 ) => {
 	const game = await prisma.game.update({
 		data: {
@@ -104,7 +111,7 @@ export const DBUpdateAvailableGameAndGame = async (
 	};
 };
 
-export const DBDeleteAvailableGame = async (id: AvailableGame["id"]) => {
+export const DBDeleteAvailableGame = async (id: GameId) => {
 	await prisma.availableGame.delete({
 		where: {
 			id,
@@ -112,7 +119,7 @@ export const DBDeleteAvailableGame = async (id: AvailableGame["id"]) => {
 	});
 };
 
-export const DBSoftDeleteAvailableGame = async (id: AvailableGame["id"]) => {
+export const DBSoftDeleteAvailableGame = async (id: GameId) => {
 	await prisma.availableGame.update({
 		where: {
 			id,
@@ -123,7 +130,7 @@ export const DBSoftDeleteAvailableGame = async (id: AvailableGame["id"]) => {
 	});
 };
 
-export const DBRestoreAvailableGame = async (id: AvailableGame["id"]) => {
+export const DBRestoreAvailableGame = async (id: GameId) => {
 	await prisma.availableGame.update({
 		where: {
 			id,
@@ -145,7 +152,7 @@ export const DBGetAvailableGames = async (includeDeleted: boolean = false) => {
 	return availableGames;
 };
 
-export const DBGetUserNameFromId = (id: AvailableUser["id"]) => {
+export const DBGetUserNameFromId = (id: UserId) => {
   return prisma.availableUser.findUnique({
     select: {
       name: true,
@@ -156,7 +163,7 @@ export const DBGetUserNameFromId = (id: AvailableUser["id"]) => {
   });
 }
 
-export const DBDeleteUser = (userId: AvailableUser["id"]) => {
+export const DBDeleteUser = (userId: UserId) => {
   return prisma.availableUser.delete({
     where: {
       id: userId,

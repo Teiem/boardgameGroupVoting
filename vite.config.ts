@@ -1,6 +1,9 @@
 import { defineConfig } from "vitest/config";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { telefunc } from 'telefunc/vite';
+import { config } from 'telefunc'
+
+config.disableNamingConvention = true
 
 export default defineConfig({
 	plugins: [sveltekit(), telefunc()],
