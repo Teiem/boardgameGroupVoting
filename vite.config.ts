@@ -5,6 +5,9 @@ import { config } from 'telefunc'
 
 config.disableNamingConvention = true
 
+const modules = import.meta.glob('./routes/**/*.telefunc.ts', { eager: true });
+console.info("modules loaded:", Object.keys(modules).length);
+
 export default defineConfig({
 	plugins: [sveltekit(), telefunc()],
 
